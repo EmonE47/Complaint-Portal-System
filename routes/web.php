@@ -1,5 +1,4 @@
 <?php
-<<<<<<< HEAD
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ComplaintController;
 use App\Http\Controllers\InspectorController;
@@ -58,11 +57,4 @@ Route::prefix('si')->middleware(['auth', 'role:2'])->group(function () {
     Route::get('/reports', [InspectorController::class, 'siReports'])->name('si.reports');
     Route::get('/profile', [InspectorController::class, 'siProfile'])->name('si.profile');
     Route::post('/update-profile', [InspectorController::class, 'updateProfile'])->name('si.updateProfile');
-=======
-
-use Illuminate\Support\Facades\Route;
-
-Route::get('/', function () {
-    return view('welcome');
->>>>>>> origin/Inspector_Dashboard
 });

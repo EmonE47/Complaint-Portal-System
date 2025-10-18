@@ -21,7 +21,6 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-<<<<<<< HEAD
         'role',
         'phone_no',
         'voter_id_number',
@@ -29,8 +28,6 @@ class User extends Authenticatable
         'police_station_id',
         'rank',
         'nid_number',
-=======
->>>>>>> origin/Inspector_Dashboard
     ];
 
     /**
@@ -55,7 +52,6 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
-<<<<<<< HEAD
 
     /**
      * Relationships
@@ -79,6 +75,4 @@ class User extends Authenticatable
     {
         return $this->hasMany(Notification::class);
     }
-=======
->>>>>>> origin/Inspector_Dashboard
 }
