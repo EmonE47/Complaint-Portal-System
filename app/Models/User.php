@@ -1,0 +1,84 @@
+<?php
+
+namespace App\Models;
+
+// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+
+class User extends Authenticatable
+{
+    /** @use HasFactory<\Database\Factories\UserFactory> */
+    use HasFactory, Notifiable;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var list<string>
+     */
+    protected $fillable = [
+        'name',
+        'email',
+        'password',
+<<<<<<< HEAD
+        'role',
+        'phone_no',
+        'voter_id_number',
+        'address',
+        'police_station_id',
+        'rank',
+        'nid_number',
+=======
+>>>>>>> origin/Inspector_Dashboard
+    ];
+
+    /**
+     * The attributes that should be hidden for serialization.
+     *
+     * @var list<string>
+     */
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
+        ];
+    }
+<<<<<<< HEAD
+
+    /**
+     * Relationships
+     */
+    public function policeStation()
+    {
+        return $this->belongsTo(PoliceStation::class);
+    }
+
+    public function activeCases()
+    {
+        return $this->hasMany(CaseAssignment::class, 'user_id')->whereIn('status', ['assigned', 'in_progress']);
+    }
+
+    public function complaints()
+    {
+        return $this->hasMany(Complaint::class, 'created_by');
+    }
+
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class);
+    }
+=======
+>>>>>>> origin/Inspector_Dashboard
+}
