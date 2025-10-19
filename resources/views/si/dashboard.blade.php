@@ -171,9 +171,9 @@
                                         Actions
                                     </button>
                                     <ul class="dropdown-menu">
-                                        <li><a class="dropdown-item" href="#"><i class="fas fa-eye me-2"></i>View Details</a></li>
+                                        <li><a class="dropdown-item view-details-btn" href="#" data-complaint-id="{{ $complaint->id }}"><i class="fas fa-eye me-2"></i>View Details</a></li>
                                         <li><a class="dropdown-item update-status-btn" href="#" data-complaint-id="{{ $complaint->id }}"><i class="fas fa-edit me-2"></i>Update Status</a></li>
-                                        <li><a class="dropdown-item" href="#"><i class="fas fa-file-alt me-2"></i>Add Notes</a></li>
+                                        <li><a class="dropdown-item add-notes-btn" href="#" data-complaint-id="{{ $complaint->id }}"><i class="fas fa-file-alt me-2"></i>Add Notes</a></li>
                                     </ul>
                                 </div>
 
@@ -330,6 +330,26 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('caseId').value = complaintId;
             document.getElementById('caseNumber').textContent = `#CMP${complaintId.padStart(7, '0')}`;
             statusUpdateModal.show();
+        });
+    });
+
+    // View details functionality (placeholder)
+    document.querySelectorAll('.view-details-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const complaintId = this.getAttribute('data-complaint-id');
+            // TODO: Implement view details functionality
+            alert(`View details for complaint ID: ${complaintId}`);
+        });
+    });
+
+    // Add notes functionality (placeholder)
+    document.querySelectorAll('.add-notes-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const complaintId = this.getAttribute('data-complaint-id');
+            // TODO: Implement add notes functionality
+            alert(`Add notes for complaint ID: ${complaintId}`);
         });
     });
 
