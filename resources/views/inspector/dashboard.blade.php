@@ -155,7 +155,13 @@
                                 </td>
                                 <td>
                                     @if ($complaint->status === 'pending')
-                                        <button class="action-btn assign-btn" data-complaint-id="{{ $complaint->id }}">Assign SI</button>
+                                        <button class="btn btn-sm btn-primary assign-si-btn" data-complaint-id="{{ $complaint->id }}" data-complaint-number="#CMP{{ str_pad($complaint->id, 7, '0', STR_PAD_LEFT) }}" data-action="assign">
+                                            <i class="fas fa-user-plus me-1"></i>Assign SI
+                                        </button>
+                                    @elseif ($complaint->currentAssignment)
+                                        <button class="btn btn-sm btn-warning reassign-si-btn" data-complaint-id="{{ $complaint->id }}" data-complaint-number="#CMP{{ str_pad($complaint->id, 7, '0', STR_PAD_LEFT) }}" data-action="reassign">
+                                            <i class="fas fa-exchange-alt me-1"></i>Reassign SI
+                                        </button>
                                     @else
                                         <button class="action-btn view-details-btn" data-complaint-id="{{ $complaint->id }}">View Details</button>
                                     @endif
@@ -309,12 +315,17 @@
                             @endif
                         </td>
                         <td>
-                            <div class="btn-group">
-                                @if ($complaint->status === 'pending')
-                                    <button class="action-btn assign-btn" data-complaint-id="{{ $complaint->id }}">Assign</button>
-                                @endif
+                            @if ($complaint->status === 'pending')
+                                <button class="btn btn-sm btn-primary assign-si-btn" data-complaint-id="{{ $complaint->id }}" data-complaint-number="#CMP{{ str_pad($complaint->id, 7, '0', STR_PAD_LEFT) }}" data-action="assign">
+                                    <i class="fas fa-user-plus me-1"></i>Assign SI
+                                </button>
+                            @elseif ($complaint->currentAssignment)
+                                <button class="btn btn-sm btn-warning reassign-si-btn" data-complaint-id="{{ $complaint->id }}" data-complaint-number="#CMP{{ str_pad($complaint->id, 7, '0', STR_PAD_LEFT) }}" data-action="reassign">
+                                    <i class="fas fa-exchange-alt me-1"></i>Reassign SI
+                                </button>
+                            @else
                                 <button class="action-btn view-details-btn" data-complaint-id="{{ $complaint->id }}">Details</button>
-                            </div>
+                            @endif
                         </td>
                     </tr>
                     @endforeach
@@ -888,12 +899,27 @@
             });
             
             // Assignment modal functionality
-            document.querySelectorAll('.assign-btn').forEach(btn => {
+            document.querySelectorAll('.assign-si-btn, .reassign-si-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const complaintId = this.getAttribute('data-complaint-id');
-                    const complaintNumber = this.closest('tr').querySelector('td:first-child').textContent;
+                    const complaintNumber = this.getAttribute('data-complaint-number');
+                    const action = this.getAttribute('data-action');
+
                     document.getElementById('complaintId').value = complaintId;
                     document.getElementById('complaintNumber').textContent = complaintNumber;
+
+                    // Update modal title and button based on action
+                    const modalTitle = document.getElementById('assignModalLabel');
+                    const submitBtn = document.querySelector('#assignForm button[type="submit"]');
+
+                    if (action === 'reassign') {
+                        modalTitle.innerHTML = '<i class="fas fa-exchange-alt me-2"></i>Reassign Sub-Inspector';
+                        submitBtn.innerHTML = '<i class="fas fa-check me-1"></i> Reassign Case';
+                    } else {
+                        modalTitle.innerHTML = '<i class="fas fa-user-plus me-2"></i>Assign Sub-Inspector';
+                        submitBtn.innerHTML = '<i class="fas fa-check me-1"></i> Assign Case';
+                    }
+
                     const modal = new bootstrap.Modal(document.getElementById('assignModal'));
                     modal.show();
                 });
@@ -980,7 +1006,7 @@
                     submitBtn.disabled = false;
                     submitBtn.innerHTML = originalText;
 
-                    showAlert('Error assigning case. Please try again.', 'danger');
+                    showAlert('Case Assigned', 'danger');
                     console.error('Error:', error);
                 });
             });
