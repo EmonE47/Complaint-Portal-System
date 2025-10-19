@@ -115,48 +115,48 @@ class InspectorController extends Controller
         ]);
 
         $user = Auth::user();
-        //this line mean what?
 
-        // Check if user is a Sub-Inspector
+        // Check if the selected user is a Sub-Inspector (role=2)
+        $subInspector = User::find($request->user_id);
+        if ($subInspector->role !== 2) {
+            return redirect()->back()->with('error', 'Only Sub-Inspectors can be assigned to cases.');
+        }
 
-
-        // $subInspector = User::find($request->user_id);
-
-        // if ($subInspector->role !== 2) {
-        //     return response()->json([
-        //         'success' => false,
-        //         'message' => 'Only Sub-Inspectors can be assigned to cases.',
-        //     ]);
-        // }
-
-        // // Check if complaint is already assigned
-        // $existingAssignment = CaseAssignment::where('complaint_id', $request->complaint_id)->first();
-        // if ($existingAssignment) {
-        //     return response()->json([
-        //         'success' => false,
-        //         'message' => 'This complaint is already assigned.',
-        //     ]);
-        // }
-
-        // Create new assignment
-        $assignment = new CaseAssignment();
-        $assignment->complaint_id = $request->complaint_id;
-        $assignment->user_id = $request->user_id;
-        $assignment->assigned_by = $user->name;
-        $assignment->assignment_notes = $request->assignment_notes;
-        $assignment->status = 'assigned';
-        $assignment->assigned_at = now();
-        $assignment->save();
+        // Check if complaint is already assigned
+        $existingAssignment = CaseAssignment::where('complaint_id', $request->complaint_id)->first();
+        if ($existingAssignment) {
+            // Update existing assignment (reassignment)
+            $existingAssignment->user_id = $request->user_id;
+            $existingAssignment->assigned_by = $user->name;
+            $existingAssignment->assignment_notes = $request->assignment_notes;
+            $existingAssignment->assigned_at = now();
+            $existingAssignment->save();
+        } else {
+            // Create new assignment
+            $assignment = new CaseAssignment();
+            $assignment->complaint_id = $request->complaint_id;
+            $assignment->user_id = $request->user_id;
+            $assignment->assigned_by = $user->name;
+            $assignment->assignment_notes = $request->assignment_notes;
+            $assignment->status = 'assigned';
+            $assignment->assigned_at = now();
+            $assignment->save();
+        }
 
         // Update complaint status to assigned
         $complaint = Complaint::find($request->complaint_id);
         $complaint->status = 'assigned';
         $complaint->save();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Case assigned successfully.',
+        // Create status history entry
+        ComplaintStatusHistory::create([
+            'complaint_id' => $complaint->id,
+            'status' => 'assigned',
+            'remarks' => 'Case assigned to SI: ' . $subInspector->name,
+            'updated_by' => $user->id,
         ]);
+
+        return redirect()->back()->with('success', 'Case assigned successfully.');
     }
 
     public function promoteToSI(Request $request)
