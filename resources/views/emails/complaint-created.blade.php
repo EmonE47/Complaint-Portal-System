@@ -8,10 +8,11 @@
     <p>Dear {{ $user->name }},</p>
     <p>A new complaint has been submitted with the following details:</p>
     <ul>
-        <li><strong>Complaint ID:</strong> {{ $complaint->id }}</li>
-        <li><strong>Title:</strong> {{ $complaint->title }}</li>
+        <li><strong>Complaint ID:</strong> {{ $complaint->complaint_number }}</li>
+        <li><strong>Type:</strong> {{ $complaint->complaint_type_text }}</li>
         <li><strong>Description:</strong> {{ $complaint->description }}</li>
-        <li><strong>Status:</strong> {{ $complaint->status }}</li>
+        <li><strong>Status:</strong> {{ $complaint->status_text }}</li>
+        <li><strong>Police Station:</strong> {{ $complaint->police_station_text }}</li>
         <li><strong>Submitted At:</strong> {{ $complaint->created_at->format('Y-m-d H:i:s') }}</li>
     </ul>
     <p>You will be notified when there are updates to this complaint.</p>
