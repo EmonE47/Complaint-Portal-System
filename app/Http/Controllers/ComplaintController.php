@@ -8,6 +8,8 @@ use App\Models\ComplaintAttachment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\ComplaintCreated;
 
 class ComplaintController extends Controller
 {
@@ -74,6 +76,9 @@ class ComplaintController extends Controller
                 'remarks' => 'Complaint filed successfully',
                 'updated_by' => Auth::id()
             ]);
+
+            // Send complaint created email
+            Mail::to($complaint->email)->send(new ComplaintCreated($complaint, Auth::user()));
 
             return response()->json([
                 'success' => true,
