@@ -235,7 +235,8 @@
                 </div>
 
                 <div class="checkbox-group">
-                    <input type="checkbox" id="is_same_address" name="is_same_address">
+                    <input type="hidden" name="is_same_address" value="0">
+                    <input type="checkbox" id="is_same_address" name="is_same_address" value="1">
                     <label for="is_same_address">Present address is same as permanent address</label>
                 </div>
 
@@ -451,7 +452,62 @@
 
     // Complaint form submission
     document.getElementById('complaint-form').addEventListener('submit', function(e) {
-        // Let the form submit normally to the backend
+        e.preventDefault();
+
+        const formData = new FormData(this);
+        const submitButton = this.querySelector('button[type="submit"]');
+        const originalText = submitButton.textContent;
+
+        // Disable button and show loading
+        submitButton.disabled = true;
+        submitButton.textContent = 'Submitting...';
+
+        fetch(this.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Show success message
+                const successMessage = document.getElementById('success-message');
+                const complaintIdElement = document.getElementById('complaint-id');
+                complaintIdElement.textContent = data.complaint_number;
+                successMessage.style.display = 'block';
+
+                // Scroll to top to show the message
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+
+                // Reset form
+                this.reset();
+
+                // Clear file preview
+                document.getElementById('file-preview').innerHTML = '';
+
+                // Hide success message after 5 seconds
+                setTimeout(() => {
+                    successMessage.style.display = 'none';
+                }, 5000);
+
+                // Update dashboard stats (optional - you might want to refresh the page or update via AJAX)
+                // location.reload();
+            } else {
+                alert('Error submitting complaint. Please try again.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred. Please try again.');
+        })
+        .finally(() => {
+            // Re-enable button
+            submitButton.disabled = false;
+            submitButton.textContent = originalText;
+        });
     });
 
     // Logout button confirmation
@@ -470,9 +526,11 @@
             presentAddressSection.style.display = 'none';
             presentAddressField.removeAttribute('required');
             presentAddressField.value = '';
+            presentAddressField.setAttribute('disabled', 'disabled');
         } else {
             presentAddressSection.style.display = 'block';
             presentAddressField.setAttribute('required', 'required');
+            presentAddressField.removeAttribute('disabled');
         }
     });
 
