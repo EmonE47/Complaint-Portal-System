@@ -15,8 +15,8 @@
 <body>
     <div class="sidebar">
         <div class="sidebar-header">
-            <h2>Police GD System</h2>
-            <p>Inspector Dashboard</p>
+            <h2>NAME OF STATION</h2>
+            {{-- <p>Inspector Dashboard</p> --}}
         </div>
         <ul class="sidebar-menu">
             <li><a href="#" class="active" data-section="dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
@@ -105,7 +105,7 @@
                         </div>
                         
                         <table class="complaints-table">
-                            <thead>
+                            <thead class="table_heading">
                                 <tr>
                                     <th>Complaint ID</th>
                                     <th>Type</th>
@@ -262,7 +262,7 @@
                 </div>
                 
                 <table class="complaints-table">
-                    <thead>
+                    <thead class="table_heading">
                         <tr>
                             <th>Complaint ID</th>
                             <th>Type</th>
@@ -349,7 +349,7 @@
                     <div class="col-lg-8">
                         <h4 class="mb-3">Sub-Inspectors</h4>
                         <table class="complaints-table">
-                            <thead>
+                            <thead class="table_heading">
                                 <tr>
                                     <th>Name</th>
                                     <th>Email</th>
@@ -418,7 +418,7 @@
                     </button>
                 </div>
                 
-                <div class="row mb-4">
+                <div class="row mb-4" id="report_header">
                     <div class="col-md-3">
                         <div class="form-group">
                             <label class="form-label">Report Type</label>
@@ -513,7 +513,7 @@
                                 <h3 class="sidebar-card-title">Recent Reports</h3>
                             </div>
                             <table class="complaints-table">
-                                <thead>
+                                <thead class="table_heading">
                                     <tr>
                                         <th>Report ID</th>
                                         <th>Type</th>
