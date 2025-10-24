@@ -241,11 +241,20 @@ body {
 /* Content Section */
 .content-section {
     background: #B5C7EB;
-    margin:10px;
+    /* margin:10px; */
+    margin-left:-42px;
+    margin-right: 20px;
+    margin-top: 10px;
     padding: 30px;
     border-radius: 5px;
     box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
     border:solid rgb(0, 107, 157) 3px
+    
+}
+#Cas_cont{
+   margin-left: 15px;
+   margin-top: 15px;
+   margin-right: 15px;
 }
 
 .section-header {
@@ -399,8 +408,12 @@ body {
     background: #B5C7EB;
     border-radius: 5px;
     padding: 25px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    margin-left: -32px;
+    margin-right: -42px ;
     box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
-    margin: 10px;
+    /* margin: 10px; */
     border:solid rgb(0, 107, 157) 3px;
 }
 
@@ -816,4 +829,9 @@ textarea.form-control {
     .message {
         max-width: 90%;
     }
+}
+#profile{
+    margin-left:10px;
+    margin-top:20px;
+    margin-right: 10px;
 }
