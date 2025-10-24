@@ -38,19 +38,29 @@ class MessageController extends Controller
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        // Get messages between user and assigned SI
+        // Determine the "other" participant in the conversation depending on role
         $assignedSI = $complaint->currentAssignment ? $complaint->currentAssignment->user : null;
 
-        if (!$assignedSI) {
-            return response()->json(['messages' => [], 'assigned_si' => null]);
+        // If the current user is a regular complainant (role==1), the other participant is the assigned SI.
+        // If the current user is an SI (role==2), the other participant is the complainant user (found by email).
+        $otherUser = null;
+        if ($user->role == 1) {
+            $otherUser = $assignedSI;
+        } elseif ($user->role == 2) {
+            $otherUser = User::where('email', $complaint->email)->first();
+        }
+
+        if (!$otherUser) {
+            // No conversation partner found (no assigned SI or no complainant user) — return empty list
+            return response()->json(['messages' => [], 'assigned_si' => $assignedSI]);
         }
 
         $messages = Message::where('complaint_id', $complaintId)
-            ->where(function ($query) use ($user, $assignedSI) {
-                $query->where(function ($q) use ($user, $assignedSI) {
-                    $q->where('sender_id', $user->id)->where('receiver_id', $assignedSI->id);
-                })->orWhere(function ($q) use ($user, $assignedSI) {
-                    $q->where('sender_id', $assignedSI->id)->where('receiver_id', $user->id);
+            ->where(function ($query) use ($user, $otherUser) {
+                $query->where(function ($q) use ($user, $otherUser) {
+                    $q->where('sender_id', $user->id)->where('receiver_id', $otherUser->id);
+                })->orWhere(function ($q) use ($user, $otherUser) {
+                    $q->where('sender_id', $otherUser->id)->where('receiver_id', $user->id);
                 });
             })
             ->with(['sender', 'receiver'])

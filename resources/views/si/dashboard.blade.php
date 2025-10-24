@@ -12,7 +12,7 @@
     <ul class="sidebar-menu">
         <li><a href="{{ route('si.dashboard') }}" class="active"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
         <li><a href="{{ route('si.cases') }}"><i class="fas fa-clipboard-list"></i> My Cases</a></li>
-        <li><a href="{{ route('si.reports') }}"><i class="fas fa-chart-bar"></i> Reports</a></li>
+        <li><a href="#" data-section="reports"><i class="fas fa-chart-bar"></i> Reports</a></li>
         <li><a href="#" data-section="messages"><i class="fas fa-envelope"></i> Messages</a></li>
         <li><a href="{{ route('si.profile') }}"><i class="fas fa-user"></i> Profile</a></li>
     </ul>
@@ -178,7 +178,6 @@
                                         <li><a class="dropdown-item add-notes-btn" href="#" data-complaint-id="{{ $complaint->id }}"><i class="fas fa-file-alt me-2"></i>Add Notes</a></li>
                                     </ul>
                                 </div>
-
                             </td>
                         </tr>
                         @endforeach
@@ -260,90 +259,209 @@
             </div>
         </div>
     </div>
-</div>
 
-<!-- Status Update Modal -->
-<div class="modal fade" id="statusUpdateModal" tabindex="-1" aria-labelledby="statusUpdateModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="statusUpdateModalLabel">
-                    <i class="fas fa-edit me-2"></i>Update Case Status
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form id="statusUpdateForm" action="{{ route('si.updateStatus') }}" method="POST">
-                @csrf
-                <div class="modal-body">
-                    <div class="text-center mb-4">
-                        <div class="card-icon investigating mx-auto mb-3">
-                            <i class="fas fa-search"></i>
+    <!-- Messages Section (in-page) -->
+    <div id="messages" class="section">
+        <div class="row" style="margin: 20px 40px; gap:20px;">
+            <div class="col-lg-4">
+                <div class="sidebar-card">
+                    <div class="sidebar-card-header">
+                        <h3 class="sidebar-card-title">Conversations</h3>
+                    </div>
+                    <div class="user-list">
+                        @foreach($assignedComplaints as $c)
+                        <div class="user-item">
+                            <div class="user-avatar-sm">{{ strtoupper(substr($c->complainant_name,0,1)) }}</div>
+                            <div class="user-details">
+                                <div class="user-name">#CMP{{ str_pad($c->id,7,'0',STR_PAD_LEFT) }} - {{ $c->complainant_name }}</div>
+                                <div class="user-meta">{{ ucfirst(str_replace('_',' ',$c->status)) }}</div>
+                            </div>
+                            <div>
+                                <button class="btn btn-outline chat-btn" data-complaint-id="{{ $c->id }}">Open</button>
+                            </div>
                         </div>
-                        <p class="mb-0">Update status for case</p>
-                        <h5 class="fw-bold text-primary" id="caseNumber">#CMP2024001</h5>
-                    </div>
-
-                    <input type="hidden" id="caseId" name="complaint_id">
-
-                    <div class="form-group">
-                        <label class="form-label">New Status</label>
-                        <select class="form-control" id="statusSelect" name="status" required>
-                            <option value="">Select Status</option>
-                            <option value="pending">Pending</option>
-                            <option value="under_investigation">Under Investigation</option>
-                            <option value="resolved">Resolved</option>
-                            <option value="rejected">Rejected</option>
-                            <option value="closed">Closed</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">Remarks</label>
-                        <textarea class="form-control" id="statusRemarks" name="remarks" rows="3" placeholder="Add any remarks about this status update..."></textarea>
+                        @endforeach
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save me-1"></i> Update Status
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- Chat Modal -->
-<div class="modal fade" id="chatModal" tabindex="-1" aria-labelledby="chatModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="chatModalLabel">Chat with User</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
-                <div id="chat-messages" style="height: 400px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; margin-bottom: 10px;">
-                    <!-- Messages will be loaded here -->
-                </div>
-                <div class="input-group">
-                    <input type="text" id="chat-message" class="form-control" placeholder="Type your message..." maxlength="1000">
-                    <button class="btn btn-primary" id="send-message">Send</button>
+
+            <div class="col-lg-8">
+                <div class="content-section">
+                    <div class="section-header">
+                        <h2 class="section-title">Messages</h2>
+                    </div>
+                    <div id="messages-panel">
+                        <div id="messages-empty" style="text-align:center;color:#7f8c8d;padding:50px">Select a conversation on the left to start chatting.</div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Loading Spinner -->
-<div class="loading-spinner" id="loadingSpinner">
-    <div class="d-flex align-items-center">
-        <div class="spinner-border text-primary me-3" role="status"></div>
-        <span>Updating status...</span>
+    <!-- Reports Section -->
+    <div id="reports" class="section">
+        <div class="content-section" style="margin:20px;">
+            <div class="section-header">
+                <h2 class="section-title">Reports & Analytics</h2>
+                <div class="d-flex" style="gap:10px;align-items:center;">
+                    <input type="date" id="report-from" class="form-control" />
+                    <input type="date" id="report-to" class="form-control" />
+                    <select id="report-status" class="form-control">
+                        <option value="">All Statuses</option>
+                        <option value="pending">Pending</option>
+                        <option value="under_investigation">Under Investigation</option>
+                        <option value="resolved">Resolved</option>
+                        <option value="closed">Closed</option>
+                    </select>
+                    <button id="generateReportBtn" class="btn btn-primary">Generate</button>
+                </div>
+            </div>
+
+            <div class="dashboard-cards" style="margin-top:20px;">
+                <div class="card">
+                    <div class="card-title">Total Assigned</div>
+                    <div class="card-value">{{ count($assignedComplaints) }}</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">Open</div>
+                    <div class="card-value">{{ $assignedComplaints->where('status','pending')->count() }}</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">Investigations</div>
+                    <div class="card-value">{{ $assignedComplaints->where('status','under_investigation')->count() }}</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">Resolved</div>
+                    <div class="card-value">{{ $assignedComplaints->where('status','resolved')->count() }}</div>
+                </div>
+            </div>
+
+            <div style="margin-top:20px;">
+                <table class="cases-table">
+                    <thead>
+                        <tr>
+                            <th>Case ID</th>
+                            <th>Type</th>
+                            <th>Status</th>
+                            <th>Complainant</th>
+                            <th>Assigned Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reportTableBody">
+                        @foreach($assignedComplaints as $c)
+                        <tr>
+                            <td>#CMP{{ str_pad($c->id,7,'0',STR_PAD_LEFT) }}</td>
+                            <td>{{ ucfirst(str_replace('_',' ',$c->complaint_type)) }}</td>
+                            <td>{{ ucwords(str_replace('_',' ',$c->status)) }}</td>
+                            <td>{{ $c->complainant_name }}</td>
+                            <td>{{ $c->currentAssignment ? $c->currentAssignment->assigned_at->format('M d, Y') : 'N/A' }}</td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Update Modal -->
+    <div class="modal fade" id="statusUpdateModal" tabindex="-1" aria-labelledby="statusUpdateModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="statusUpdateModalLabel">
+                        <i class="fas fa-edit me-2"></i>Update Case Status
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="statusUpdateForm" action="{{ route('si.updateStatus') }}" method="POST">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="text-center mb-4">
+                            <div class="card-icon investigating mx-auto mb-3">
+                                <i class="fas fa-search"></i>
+                            </div>
+                            <p class="mb-0">Update status for case</p>
+                            <h5 class="fw-bold text-primary" id="caseNumber">#CMP2024001</h5>
+                        </div>
+
+                        <input type="hidden" id="caseId" name="complaint_id">
+
+                        <div class="form-group">
+                            <label class="form-label">New Status</label>
+                            <select class="form-control" id="statusSelect" name="status" required>
+                                <option value="">Select Status</option>
+                                <option value="pending">Pending</option>
+                                <option value="under_investigation">Under Investigation</option>
+                                <option value="resolved">Resolved</option>
+                                <option value="rejected">Rejected</option>
+                                <option value="closed">Closed</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Remarks</label>
+                            <textarea class="form-control" id="statusRemarks" name="remarks" rows="3" placeholder="Add any remarks about this status update..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i> Update Status
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat Modal -->
+    <div class="modal fade" id="chatModal" tabindex="-1" aria-labelledby="chatModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="chatModalLabel">Chat with User</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="chat-messages" style="height: 400px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; margin-bottom: 10px;">
+                        <!-- Messages will be loaded here -->
+                    </div>
+                    <div class="input-group">
+                        <input type="text" id="chat-message" class="form-control" placeholder="Type your message..." maxlength="1000">
+                        <button class="btn btn-primary" id="send-message">Send</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div class="loading-spinner" id="loadingSpinner">
+        <div class="d-flex align-items-center">
+            <div class="spinner-border text-primary me-3" role="status"></div>
+            <span>Updating status...</span>
+        </div>
     </div>
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Sidebar navigation for in-page sections (reports, messages)
+    document.querySelectorAll('.sidebar-menu a[data-section]').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            // remove active on other links
+            document.querySelectorAll('.sidebar-menu a').forEach(a => a.classList.remove('active'));
+            this.classList.add('active');
+
+            // hide all sections and show the selected one
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            const id = this.getAttribute('data-section');
+            const section = document.getElementById(id);
+            if (section) section.classList.add('active');
+        });
+    });
+
     // Status update modal functionality
     const statusUpdateModal = new bootstrap.Modal(document.getElementById('statusUpdateModal'));
 
@@ -399,20 +517,45 @@ document.addEventListener('DOMContentLoaded', function() {
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}'
             }
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(err => {
+                    console.error('Failed to load messages (status ' + response.status + '):', err);
+                    const messagesContainer = document.getElementById('chat-messages');
+                    messagesContainer.innerHTML = `<p style="text-align: center; color: #e74c3c;">Unable to load messages (HTTP ${response.status}). Check console for details.</p>`;
+                    throw new Error('Failed to load messages');
+                }).catch(() => {
+                    const messagesContainer = document.getElementById('chat-messages');
+                    messagesContainer.innerHTML = `<p style="text-align: center; color: #e74c3c;">Unable to load messages (HTTP ${response.status}).</p>`;
+                    throw new Error('Failed to load messages');
+                });
+            }
+
+            return response.json();
+        })
         .then(data => {
+            console.debug('loadMessages response for complaint', complaintId, data);
+
             const messagesContainer = document.getElementById('chat-messages');
             messagesContainer.innerHTML = '';
 
-            if (data.messages && data.messages.length > 0) {
-                data.messages.forEach(message => {
+            const messages = data && data.messages ? data.messages : (data && data.data ? data.data : []);
+
+            if (Array.isArray(messages) && messages.length > 0) {
+                messages.forEach(message => {
+                    // Fix sender detection - use strict comparison
+                    const isSent = parseInt(message.sender_id) === {{ Auth::id() }};
+                    const senderName = message.sender && message.sender.name ? message.sender.name : (message.sender_name || 'Unknown');
+                    const createdAt = message.created_at || message.createdAt || message.created;
+
                     const messageDiv = document.createElement('div');
-                    messageDiv.className = `message ${message.sender_id == {{ Auth::id() }} ? 'sent' : 'received'}`;
+                    messageDiv.className = `message ${isSent ? 'sent' : 'received'}`;
                     messageDiv.innerHTML = `
                         <div class="message-content">
-                            <strong>${message.sender.name}:</strong> ${message.message}
+                            <strong>${isSent ? 'You' : senderName}:</strong> 
+                            <span>${message.message}</span>
                         </div>
-                        <div class="message-time">${new Date(message.created_at).toLocaleString()}</div>
+                        <div class="message-time">${createdAt ? new Date(createdAt).toLocaleString() : ''}</div>
                     `;
                     messagesContainer.appendChild(messageDiv);
                 });
@@ -635,32 +778,6 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <style>
-.message {
-    margin-bottom: 10px;
-    padding: 8px 12px;
-    border-radius: 8px;
-    max-width: 70%;
-}
 
-.message.sent {
-    margin-left: auto;
-    background-color: #007bff;
-    color: white;
-}
-
-.message.received {
-    margin-right: auto;
-    background-color: #f8f9fa;
-    color: #333;
-}
-
-.message-content {
-    margin-bottom: 4px;
-}
-
-.message-time {
-    font-size: 0.8em;
-    opacity: 0.7;
-}
 </style>
 @endsection
