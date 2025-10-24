@@ -106,7 +106,12 @@
                         <td>{{ $complaint->police_station_text }}</td>
                         <td>{{ $complaint->created_at->format('d M Y') }}</td>
                         <td><span class="status-badge status-{{ str_replace('_', '-', $complaint->status) }}">{{ $complaint->status_text }}</span></td>
-                        <td><a href="#" class="view-details" data-id="{{ $complaint->id }}">View Details</a></td>
+                        <td>
+                            <a href="#" class="view-details" data-id="{{ $complaint->id }}">View Details</a>
+                            @if($complaint->currentAssignment)
+                                <br><a href="#" class="chat-btn" data-id="{{ $complaint->id }}" style="color: #007bff; margin-top: 5px; display: inline-block;"><i class="fas fa-comments"></i> Chat</a>
+                            @endif
+                        </td>
                     </tr>
                     @endforeach
                 </tbody>
@@ -185,7 +190,12 @@
                         <td>{{ $complaint->police_station_text }}</td>
                         <td>{{ $complaint->created_at->format('d M Y') }}</td>
                         <td><span class="status-badge status-{{ str_replace('_', '-', $complaint->status) }}">{{ $complaint->status_text }}</span></td>
-                        <td><a href="#" class="view-details" data-id="{{ $complaint->id }}">View Details</a></td>
+                        <td>
+                            <a href="#" class="view-details" data-id="{{ $complaint->id }}">View Details</a>
+                            @if($complaint->currentAssignment)
+                                <br><a href="#" class="chat-btn" data-id="{{ $complaint->id }}" style="color: #007bff; margin-top: 5px; display: inline-block;"><i class="fas fa-comments"></i> Chat</a>
+                            @endif
+                        </td>
                     </tr>
                     @endforeach
                 </tbody>
@@ -328,6 +338,27 @@
                     <li style="margin-bottom: 10px;">Phone: +880 1234-567890</li>
                     <li>Office Hours: Mon-Fri, 9:00 AM - 6:00 PM</li>
                 </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chat Modal -->
+<div class="modal fade" id="chatModal" tabindex="-1" aria-labelledby="chatModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="chatModalLabel">Chat with SI</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="chat-messages" style="height: 400px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; margin-bottom: 10px;">
+                    <!-- Messages will be loaded here -->
+                </div>
+                <div class="input-group">
+                    <input type="text" id="chat-message" class="form-control" placeholder="Type your message..." maxlength="1000">
+                    <button class="btn btn-primary" id="send-message">Send</button>
+                </div>
             </div>
         </div>
     </div>
@@ -570,7 +601,150 @@
         }
     });
 
+    // Chat functionality
+    let currentComplaintId = null;
+    let chatModal = null;
+
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('chat-btn')) {
+            e.preventDefault();
+            currentComplaintId = e.target.getAttribute('data-id');
+            openChatModal(currentComplaintId);
+        }
+    });
+
+    function openChatModal(complaintId) {
+        // Initialize modal if not already done
+        if (!chatModal) {
+            chatModal = new bootstrap.Modal(document.getElementById('chatModal'));
+        }
+
+        // Load messages
+        loadMessages(complaintId);
+
+        // Show modal
+        chatModal.show();
+    }
+
+    function loadMessages(complaintId) {
+        fetch(`/messages/${complaintId}`, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            const messagesContainer = document.getElementById('chat-messages');
+            messagesContainer.innerHTML = '';
+
+            if (data.messages && data.messages.length > 0) {
+                data.messages.forEach(message => {
+                    const messageDiv = document.createElement('div');
+                    messageDiv.className = `message ${message.sender_id == {{ Auth::id() }} ? 'sent' : 'received'}`;
+                    messageDiv.innerHTML = `
+                        <div class="message-content">
+                            <strong>${message.sender.name}:</strong> ${message.message}
+                        </div>
+                        <div class="message-time">${new Date(message.created_at).toLocaleString()}</div>
+                    `;
+                    messagesContainer.appendChild(messageDiv);
+                });
+            } else {
+                messagesContainer.innerHTML = '<p style="text-align: center; color: #7f8c8d;">No messages yet. Start the conversation!</p>';
+            }
+
+            // Scroll to bottom
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        })
+        .catch(error => {
+            console.error('Error loading messages:', error);
+        });
+    }
+
+    // Send message
+    document.getElementById('send-message').addEventListener('click', function() {
+        const messageInput = document.getElementById('chat-message');
+        const message = messageInput.value.trim();
+
+        if (!message || !currentComplaintId) return;
+
+        // Disable send button
+        this.disabled = true;
+        this.textContent = 'Sending...';
+
+        fetch('/messages/send', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({
+                complaint_id: currentComplaintId,
+                message: message
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                messageInput.value = '';
+                loadMessages(currentComplaintId);
+            } else {
+                alert('Error sending message. Please try again.');
+            }
+        })
+        .catch(error => {
+            console.error('Error sending message:', error);
+            alert('Error sending message. Please try again.');
+        })
+        .finally(() => {
+            // Re-enable send button
+            this.disabled = false;
+            this.textContent = 'Send';
+        });
+    });
+
+    // Send message on Enter key
+    document.getElementById('chat-message').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            document.getElementById('send-message').click();
+        }
+    });
+
     // Initialize the form state
     document.getElementById('is_same_address').dispatchEvent(new Event('change'));
 </script>
+
+<style>
+.message {
+    margin-bottom: 10px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    max-width: 70%;
+}
+
+.message.sent {
+    margin-left: auto;
+    background-color: #007bff;
+    color: white;
+}
+
+.message.received {
+    margin-right: auto;
+    background-color: #f8f9fa;
+    color: #333;
+}
+
+.message-content {
+    margin-bottom: 4px;
+}
+
+.message-time {
+    font-size: 0.8em;
+    opacity: 0.7;
+}
+</style>
 @endsection

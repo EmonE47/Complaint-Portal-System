@@ -7,13 +7,13 @@
 <div class="sidebar">
     <div class="sidebar-header">
         <h2>Police GD System</h2>
-        <p>Sub-Inspector Dashboard</p>
     </div>
     <ul class="sidebar-menu">
-        <li><a href="{{ route('si.dashboard') }}" class="active"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
-        <li><a href="{{ route('si.cases') }}"><i class="fas fa-clipboard-list"></i> My Cases</a></li>
-        <li><a href="{{ route('si.reports') }}"><i class="fas fa-chart-bar"></i> Reports</a></li>
-        <li><a href="{{ route('si.profile') }}"><i class="fas fa-user"></i> Profile</a></li>
+        <li><a href="#" data-section="dashboard" class="active"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+        <li><a href="#" data-section="cases"><i class="fas fa-clipboard-list"></i> My Cases</a></li>
+        <li><a href="#" data-section="reports"><i class="fas fa-chart-bar"></i> Reports</a></li>
+        <li><a href="#" data-section="messages"><i class="fas fa-envelope"></i> Messages</a></li>
+        <li><a href="#" data-section="profile"><i class="fas fa-user"></i> Profile</a></li>
     </ul>
 </div>
 
@@ -77,7 +77,10 @@
                 <div class="card-footer">Successfully resolved</div>
             </div>
         </div>
+    </div>
 
+    <!-- Cases Section (in-page) -->
+    <div id="cases" class="section">
         <div class="row" style="margin: 0 40px 40px;">
             <div class="col-lg-8">
                 <div class="content-section">
@@ -173,10 +176,10 @@
                                     <ul class="dropdown-menu">
                                         <li><a class="dropdown-item view-details-btn" href="#" data-complaint-id="{{ $complaint->id }}"><i class="fas fa-eye me-2"></i>View Details</a></li>
                                         <li><a class="dropdown-item update-status-btn" href="#" data-complaint-id="{{ $complaint->id }}"><i class="fas fa-edit me-2"></i>Update Status</a></li>
+                                        <li><a class="dropdown-item chat-btn" href="#" data-complaint-id="{{ $complaint->id }}"><i class="fas fa-comments me-2"></i>Chat with User</a></li>
                                         <li><a class="dropdown-item add-notes-btn" href="#" data-complaint-id="{{ $complaint->id }}"><i class="fas fa-file-alt me-2"></i>Add Notes</a></li>
                                     </ul>
                                 </div>
-
                             </td>
                         </tr>
                         @endforeach
@@ -258,69 +261,283 @@
             </div>
         </div>
     </div>
-</div>
 
-<!-- Status Update Modal -->
-<div class="modal fade" id="statusUpdateModal" tabindex="-1" aria-labelledby="statusUpdateModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="statusUpdateModalLabel">
-                    <i class="fas fa-edit me-2"></i>Update Case Status
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+    <!-- Messages Section (in-page) -->
+    <!-- Profile Section (in-page) -->
+    <div id="profile" class="section">
+        <div class="content-section" id="profile">
+            <div class="section-header">
+                <h2 class="section-title">My Profile</h2>
             </div>
-            <form id="statusUpdateForm" action="{{ route('si.updateStatus') }}" method="POST">
+
+            <form id="profile-form" action="{{ route('si.profile') }}" method="POST">
                 @csrf
-                <div class="modal-body">
-                    <div class="text-center mb-4">
-                        <div class="card-icon investigating mx-auto mb-3">
-                            <i class="fas fa-search"></i>
-                        </div>
-                        <p class="mb-0">Update status for case</p>
-                        <h5 class="fw-bold text-primary" id="caseNumber">#CMP2024001</h5>
-                    </div>
-
-                    <input type="hidden" id="caseId" name="complaint_id">
-
+                <div class="form-row">
                     <div class="form-group">
-                        <label class="form-label">New Status</label>
-                        <select class="form-control" id="statusSelect" name="status" required>
-                            <option value="">Select Status</option>
-                            <option value="pending">Pending</option>
-                            <option value="under_investigation">Under Investigation</option>
-                            <option value="resolved">Resolved</option>
-                            <option value="rejected">Rejected</option>
-                            <option value="closed">Closed</option>
-                        </select>
+                        <label class="form-label">Full Name</label>
+                        <input type="text" class="form-control" name="name" value="{{ Auth::user()->name }}" required>
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">Remarks</label>
-                        <textarea class="form-control" id="statusRemarks" name="remarks" rows="3" placeholder="Add any remarks about this status update..."></textarea>
+                        <label class="form-label">Email Address</label>
+                        <input type="email" class="form-control" name="email" value="{{ Auth::user()->email }}" required>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save me-1"></i> Update Status
-                    </button>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Phone Number</label>
+                        <input type="tel" class="form-control" name="phone_no" value="{{ Auth::user()->phone_no ?? '' }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Voter ID Number</label>
+                        <input type="text" class="form-control" name="voter_id_number" value="{{ Auth::user()->voter_id_number ?? '' }}">
+                    </div>
                 </div>
+
+                <button type="submit" class="btn-primary">Update Profile</button>
             </form>
         </div>
     </div>
-</div>
+    <div id="messages" class="section">
+        <div class="row" style="margin: 20px 40px; gap:20px;">
+            <div class="col-lg-4">
+                <div class="sidebar-card">
+                    <div class="sidebar-card-header">
+                        <h3 class="sidebar-card-title">Conversations</h3>
+                    </div>
+                    <div class="user-list">
+                        @foreach($assignedComplaints as $c)
+                        <div class="user-item">
+                            <div class="user-avatar-sm">{{ strtoupper(substr($c->complainant_name,0,1)) }}</div>
+                            <div class="user-details">
+                                <div class="user-name">#CMP{{ str_pad($c->id,7,'0',STR_PAD_LEFT) }} - {{ $c->complainant_name }}</div>
+                                <div class="user-meta">{{ ucfirst(str_replace('_',' ',$c->status)) }}</div>
+                            </div>
+                            <div>
+                                <button class="btn btn-outline chat-btn" data-complaint-id="{{ $c->id }}">Open</button>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
 
-<!-- Loading Spinner -->
-<div class="loading-spinner" id="loadingSpinner">
-    <div class="d-flex align-items-center">
-        <div class="spinner-border text-primary me-3" role="status"></div>
-        <span>Updating status...</span>
+            <div class="col-lg-8">
+                <div class="content-section" id="Content_of_My_cases">
+                    <div class="section-header">
+                        <h2 class="section-title">Messages</h2>
+                    </div>
+                    <div id="messages-panel">
+                        <div id="messages-empty" style="text-align:center;color:#7f8c8d;padding:50px">Select a conversation on the left to start chatting.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reports Section -->
+    <div id="reports" class="section">
+        <div class="content-section" style="margin:20px;">
+            <div class="section-header">
+                <h2 class="section-title">Reports & Analytics</h2>
+                <div class="d-flex" style="gap:10px;align-items:center;">
+                    <input type="date" id="report-from" class="form-control" />
+                    <input type="date" id="report-to" class="form-control" />
+                    <select id="report-status" class="form-control">
+                        <option value="">All Statuses</option>
+                        <option value="pending">Pending</option>
+                        <option value="under_investigation">Under Investigation</option>
+                        <option value="resolved">Resolved</option>
+                        <option value="closed">Closed</option>
+                    </select>
+                    <button id="generateReportBtn" class="btn btn-primary">Generate</button>
+                </div>
+            </div>
+
+            <div class="dashboard-cards" style="margin-top:20px;">
+                <div class="card">
+                    <div class="card-title">Total Assigned</div>
+                    <div class="card-value">{{ count($assignedComplaints) }}</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">Open</div>
+                    <div class="card-value">{{ $assignedComplaints->where('status','pending')->count() }}</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">Investigations</div>
+                    <div class="card-value">{{ $assignedComplaints->where('status','under_investigation')->count() }}</div>
+                </div>
+                <div class="card">
+                    <div class="card-title">Resolved</div>
+                    <div class="card-value">{{ $assignedComplaints->where('status','resolved')->count() }}</div>
+                </div>
+            </div>
+
+            <div style="margin-top:20px;">
+                <table class="cases-table">
+                    <thead>
+                        <tr>
+                            <th>Case ID</th>
+                            <th>Type</th>
+                            <th>Status</th>
+                            <th>Complainant</th>
+                            <th>Assigned Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reportTableBody">
+                        @foreach($assignedComplaints as $c)
+                        <tr>
+                            <td>#CMP{{ str_pad($c->id,7,'0',STR_PAD_LEFT) }}</td>
+                            <td>{{ ucfirst(str_replace('_',' ',$c->complaint_type)) }}</td>
+                            <td>{{ ucwords(str_replace('_',' ',$c->status)) }}</td>
+                            <td>{{ $c->complainant_name }}</td>
+                            <td>{{ $c->currentAssignment ? $c->currentAssignment->assigned_at->format('M d, Y') : 'N/A' }}</td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Update Modal -->
+    <div class="modal fade" id="statusUpdateModal" tabindex="-1" aria-labelledby="statusUpdateModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="statusUpdateModalLabel">
+                        <i class="fas fa-edit me-2"></i>Update Case Status
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="statusUpdateForm" action="{{ route('si.updateStatus') }}" method="POST">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="text-center mb-4">
+                            <div class="card-icon investigating mx-auto mb-3">
+                                <i class="fas fa-search"></i>
+                            </div>
+                            <p class="mb-0">Update status for case</p>
+                            <h5 class="fw-bold text-primary" id="caseNumber">#CMP2024001</h5>
+                        </div>
+
+                        <input type="hidden" id="caseId" name="complaint_id">
+
+                        <div class="form-group">
+                            <label class="form-label">New Status</label>
+                            <select class="form-control" id="statusSelect" name="status" required>
+                                <option value="">Select Status</option>
+                                <option value="pending">Pending</option>
+                                <option value="under_investigation">Under Investigation</option>
+                                <option value="resolved">Resolved</option>
+                                <option value="rejected">Rejected</option>
+                                <option value="closed">Closed</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Remarks</label>
+                            <textarea class="form-control" id="statusRemarks" name="remarks" rows="3" placeholder="Add any remarks about this status update..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i> Update Status
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat Modal -->
+    <div class="modal fade" id="chatModal" tabindex="-1" aria-labelledby="chatModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="chatModalLabel">Chat with User</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="chat-messages" style="height: 400px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; margin-bottom: 10px;">
+                        <!-- Messages will be loaded here -->
+                    </div>
+                    <div class="input-group">
+                        <input type="text" id="chat-message" class="form-control" placeholder="Type your message..." maxlength="1000">
+                        <button class="btn btn-primary" id="send-message">Send</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div class="loading-spinner" id="loadingSpinner">
+        <div class="d-flex align-items-center">
+            <div class="spinner-border text-primary me-3" role="status"></div>
+            <span>Updating status...</span>
+        </div>
     </div>
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Sidebar navigation for in-page sections (reports, messages)
+    document.querySelectorAll('.sidebar-menu a[data-section]').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            // remove active on other links
+            document.querySelectorAll('.sidebar-menu a').forEach(a => a.classList.remove('active'));
+            this.classList.add('active');
+
+            // hide all sections and show the selected one
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            const id = this.getAttribute('data-section');
+            const section = document.getElementById(id);
+            if (section) section.classList.add('active');
+        });
+    });
+
+    // Persist sidebar active item across page navigations (so clicking My Cases / Profile keeps sidebar appearance)
+    // Store active link key (data-section or href) in localStorage whenever a sidebar link is clicked.
+    document.querySelectorAll('.sidebar-menu a').forEach(link => {
+        link.addEventListener('click', function(e) {
+            try {
+                const key = this.getAttribute('data-section') || this.getAttribute('href');
+                if (key) localStorage.setItem('siSidebarActive', key);
+            } catch (err) {
+                // ignore storage errors
+            }
+        });
+    });
+
+    // On load, restore active sidebar item if stored
+    try {
+        const activeKey = localStorage.getItem('siSidebarActive');
+        if (activeKey) {
+            // remove active from all and add to the stored one
+            document.querySelectorAll('.sidebar-menu a').forEach(a => a.classList.remove('active'));
+            const selectorByData = document.querySelector(`.sidebar-menu a[data-section="${activeKey}"]`);
+            const selectorByHref = document.querySelector(`.sidebar-menu a[href="${activeKey}"]`);
+            const toActivate = selectorByData || selectorByHref;
+            if (toActivate) {
+                toActivate.classList.add('active');
+                // If it's an in-page section, also show it
+                const ds = toActivate.getAttribute('data-section');
+                if (ds) {
+                    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+                    const sec = document.getElementById(ds);
+                    if (sec) sec.classList.add('active');
+                }
+            }
+        }
+    } catch (err) {
+        // ignore localStorage errors
+    }
+
     // Status update modal functionality
     const statusUpdateModal = new bootstrap.Modal(document.getElementById('statusUpdateModal'));
 
@@ -341,6 +558,144 @@ document.addEventListener('DOMContentLoaded', function() {
             // TODO: Implement view details functionality
             alert(`View details for complaint ID: ${complaintId}`);
         });
+    });
+
+    // Chat functionality
+    let currentComplaintId = null;
+    let chatModal = null;
+
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('chat-btn')) {
+            e.preventDefault();
+            currentComplaintId = e.target.getAttribute('data-complaint-id');
+            openChatModal(currentComplaintId);
+        }
+    });
+
+    function openChatModal(complaintId) {
+        // Initialize modal if not already done
+        if (!chatModal) {
+            chatModal = new bootstrap.Modal(document.getElementById('chatModal'));
+        }
+
+        // Load messages
+        loadMessages(complaintId);
+
+        // Show modal
+        chatModal.show();
+    }
+
+    function loadMessages(complaintId) {
+        fetch(`/messages/${complaintId}`, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(err => {
+                    console.error('Failed to load messages (status ' + response.status + '):', err);
+                    const messagesContainer = document.getElementById('chat-messages');
+                    messagesContainer.innerHTML = `<p style="text-align: center; color: #e74c3c;">Unable to load messages (HTTP ${response.status}). Check console for details.</p>`;
+                    throw new Error('Failed to load messages');
+                }).catch(() => {
+                    const messagesContainer = document.getElementById('chat-messages');
+                    messagesContainer.innerHTML = `<p style="text-align: center; color: #e74c3c;">Unable to load messages (HTTP ${response.status}).</p>`;
+                    throw new Error('Failed to load messages');
+                });
+            }
+
+            return response.json();
+        })
+        .then(data => {
+            console.debug('loadMessages response for complaint', complaintId, data);
+
+            const messagesContainer = document.getElementById('chat-messages');
+            messagesContainer.innerHTML = '';
+
+            const messages = data && data.messages ? data.messages : (data && data.data ? data.data : []);
+
+            if (Array.isArray(messages) && messages.length > 0) {
+                messages.forEach(message => {
+                    // Fix sender detection - use strict comparison
+                    const isSent = parseInt(message.sender_id) === {{ Auth::id() }};
+                    const senderName = message.sender && message.sender.name ? message.sender.name : (message.sender_name || 'Unknown');
+                    const createdAt = message.created_at || message.createdAt || message.created;
+
+                    const messageDiv = document.createElement('div');
+                    messageDiv.className = `message ${isSent ? 'sent' : 'received'}`;
+                    messageDiv.innerHTML = `
+                        <div class="message-content">
+                            <strong>${isSent ? 'You' : senderName}:</strong> 
+                            <span>${message.message}</span>
+                        </div>
+                        <div class="message-time">${createdAt ? new Date(createdAt).toLocaleString() : ''}</div>
+                    `;
+                    messagesContainer.appendChild(messageDiv);
+                });
+            } else {
+                messagesContainer.innerHTML = '<p style="text-align: center; color: #7f8c8d;">No messages yet. Start the conversation!</p>';
+            }
+
+            // Scroll to bottom
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        })
+        .catch(error => {
+            console.error('Error loading messages:', error);
+        });
+    }
+
+    // Send message
+    document.getElementById('send-message').addEventListener('click', function() {
+        const messageInput = document.getElementById('chat-message');
+        const message = messageInput.value.trim();
+
+        if (!message || !currentComplaintId) return;
+
+        // Disable send button
+        this.disabled = true;
+        this.textContent = 'Sending...';
+
+        fetch('/messages/send', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({
+                complaint_id: currentComplaintId,
+                message: message
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                messageInput.value = '';
+                loadMessages(currentComplaintId);
+            } else {
+                alert('Error sending message. Please try again.');
+            }
+        })
+        .catch(error => {
+            console.error('Error sending message:', error);
+            alert('Error sending message. Please try again.');
+        })
+        .finally(() => {
+            // Re-enable send button
+            this.disabled = false;
+            this.textContent = 'Send';
+        });
+    });
+
+    // Send message on Enter key
+    document.getElementById('chat-message').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            document.getElementById('send-message').click();
+        }
     });
 
     // Add notes functionality (placeholder)
@@ -497,4 +852,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
+
+<style>
+
+</style>
 @endsection
