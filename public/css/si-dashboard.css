@@ -248,8 +248,8 @@ body {
     padding: 30px;
     border-radius: 5px;
     box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
-    border:solid rgb(0, 107, 157) 3px
-    
+    border:solid rgb(0, 107, 157) 3px;
+    overflow: visible;
 }
 #Cas_cont{
    margin-left: 15px;
@@ -321,6 +321,7 @@ body {
     border-collapse: collapse;
     border:solid rgb(0, 107, 157) 3px;
     border-radius: 20px;
+    overflow: visible;
 }
 
 .cases-table thead {
