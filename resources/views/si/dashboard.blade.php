@@ -7,14 +7,13 @@
 <div class="sidebar">
     <div class="sidebar-header">
         <h2>Police GD System</h2>
-        <p>Sub-Inspector Dashboard</p>
     </div>
     <ul class="sidebar-menu">
-        <li><a href="{{ route('si.dashboard') }}" class="active"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
-        <li><a href="{{ route('si.cases') }}"><i class="fas fa-clipboard-list"></i> My Cases</a></li>
+        <li><a href="#" data-section="dashboard" class="active"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+        <li><a href="#" data-section="cases"><i class="fas fa-clipboard-list"></i> My Cases</a></li>
         <li><a href="#" data-section="reports"><i class="fas fa-chart-bar"></i> Reports</a></li>
         <li><a href="#" data-section="messages"><i class="fas fa-envelope"></i> Messages</a></li>
-        <li><a href="{{ route('si.profile') }}"><i class="fas fa-user"></i> Profile</a></li>
+        <li><a href="#" data-section="profile"><i class="fas fa-user"></i> Profile</a></li>
     </ul>
 </div>
 
@@ -78,7 +77,10 @@
                 <div class="card-footer">Successfully resolved</div>
             </div>
         </div>
+    </div>
 
+    <!-- Cases Section (in-page) -->
+    <div id="cases" class="section">
         <div class="row" style="margin: 0 40px 40px;">
             <div class="col-lg-8">
                 <div class="content-section">
@@ -261,6 +263,43 @@
     </div>
 
     <!-- Messages Section (in-page) -->
+    <!-- Profile Section (in-page) -->
+    <div id="profile" class="section">
+        <div class="content-section" id="profile">
+            <div class="section-header">
+                <h2 class="section-title">My Profile</h2>
+            </div>
+
+            <form id="profile-form" action="{{ route('si.profile') }}" method="POST">
+                @csrf
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Full Name</label>
+                        <input type="text" class="form-control" name="name" value="{{ Auth::user()->name }}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Email Address</label>
+                        <input type="email" class="form-control" name="email" value="{{ Auth::user()->email }}" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Phone Number</label>
+                        <input type="tel" class="form-control" name="phone_no" value="{{ Auth::user()->phone_no ?? '' }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Voter ID Number</label>
+                        <input type="text" class="form-control" name="voter_id_number" value="{{ Auth::user()->voter_id_number ?? '' }}">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-primary">Update Profile</button>
+            </form>
+        </div>
+    </div>
     <div id="messages" class="section">
         <div class="row" style="margin: 20px 40px; gap:20px;">
             <div class="col-lg-4">
@@ -286,7 +325,7 @@
             </div>
 
             <div class="col-lg-8">
-                <div class="content-section">
+                <div class="content-section" id="Content_of_My_cases">
                     <div class="section-header">
                         <h2 class="section-title">Messages</h2>
                     </div>
@@ -461,6 +500,43 @@ document.addEventListener('DOMContentLoaded', function() {
             if (section) section.classList.add('active');
         });
     });
+
+    // Persist sidebar active item across page navigations (so clicking My Cases / Profile keeps sidebar appearance)
+    // Store active link key (data-section or href) in localStorage whenever a sidebar link is clicked.
+    document.querySelectorAll('.sidebar-menu a').forEach(link => {
+        link.addEventListener('click', function(e) {
+            try {
+                const key = this.getAttribute('data-section') || this.getAttribute('href');
+                if (key) localStorage.setItem('siSidebarActive', key);
+            } catch (err) {
+                // ignore storage errors
+            }
+        });
+    });
+
+    // On load, restore active sidebar item if stored
+    try {
+        const activeKey = localStorage.getItem('siSidebarActive');
+        if (activeKey) {
+            // remove active from all and add to the stored one
+            document.querySelectorAll('.sidebar-menu a').forEach(a => a.classList.remove('active'));
+            const selectorByData = document.querySelector(`.sidebar-menu a[data-section="${activeKey}"]`);
+            const selectorByHref = document.querySelector(`.sidebar-menu a[href="${activeKey}"]`);
+            const toActivate = selectorByData || selectorByHref;
+            if (toActivate) {
+                toActivate.classList.add('active');
+                // If it's an in-page section, also show it
+                const ds = toActivate.getAttribute('data-section');
+                if (ds) {
+                    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+                    const sec = document.getElementById(ds);
+                    if (sec) sec.classList.add('active');
+                }
+            }
+        }
+    } catch (err) {
+        // ignore localStorage errors
+    }
 
     // Status update modal functionality
     const statusUpdateModal = new bootstrap.Modal(document.getElementById('statusUpdateModal'));
