@@ -13,6 +13,7 @@
         <li><a href="{{ route('si.dashboard') }}" class="active"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
         <li><a href="{{ route('si.cases') }}"><i class="fas fa-clipboard-list"></i> My Cases</a></li>
         <li><a href="{{ route('si.reports') }}"><i class="fas fa-chart-bar"></i> Reports</a></li>
+        <li><a href="#" data-section="messages"><i class="fas fa-envelope"></i> Messages</a></li>
         <li><a href="{{ route('si.profile') }}"><i class="fas fa-user"></i> Profile</a></li>
     </ul>
 </div>
@@ -173,6 +174,7 @@
                                     <ul class="dropdown-menu">
                                         <li><a class="dropdown-item view-details-btn" href="#" data-complaint-id="{{ $complaint->id }}"><i class="fas fa-eye me-2"></i>View Details</a></li>
                                         <li><a class="dropdown-item update-status-btn" href="#" data-complaint-id="{{ $complaint->id }}"><i class="fas fa-edit me-2"></i>Update Status</a></li>
+                                        <li><a class="dropdown-item chat-btn" href="#" data-complaint-id="{{ $complaint->id }}"><i class="fas fa-comments me-2"></i>Chat with User</a></li>
                                         <li><a class="dropdown-item add-notes-btn" href="#" data-complaint-id="{{ $complaint->id }}"><i class="fas fa-file-alt me-2"></i>Add Notes</a></li>
                                     </ul>
                                 </div>
@@ -311,6 +313,27 @@
     </div>
 </div>
 
+<!-- Chat Modal -->
+<div class="modal fade" id="chatModal" tabindex="-1" aria-labelledby="chatModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="chatModalLabel">Chat with User</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="chat-messages" style="height: 400px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; margin-bottom: 10px;">
+                    <!-- Messages will be loaded here -->
+                </div>
+                <div class="input-group">
+                    <input type="text" id="chat-message" class="form-control" placeholder="Type your message..." maxlength="1000">
+                    <button class="btn btn-primary" id="send-message">Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Loading Spinner -->
 <div class="loading-spinner" id="loadingSpinner">
     <div class="d-flex align-items-center">
@@ -341,6 +364,119 @@ document.addEventListener('DOMContentLoaded', function() {
             // TODO: Implement view details functionality
             alert(`View details for complaint ID: ${complaintId}`);
         });
+    });
+
+    // Chat functionality
+    let currentComplaintId = null;
+    let chatModal = null;
+
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('chat-btn')) {
+            e.preventDefault();
+            currentComplaintId = e.target.getAttribute('data-complaint-id');
+            openChatModal(currentComplaintId);
+        }
+    });
+
+    function openChatModal(complaintId) {
+        // Initialize modal if not already done
+        if (!chatModal) {
+            chatModal = new bootstrap.Modal(document.getElementById('chatModal'));
+        }
+
+        // Load messages
+        loadMessages(complaintId);
+
+        // Show modal
+        chatModal.show();
+    }
+
+    function loadMessages(complaintId) {
+        fetch(`/messages/${complaintId}`, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            const messagesContainer = document.getElementById('chat-messages');
+            messagesContainer.innerHTML = '';
+
+            if (data.messages && data.messages.length > 0) {
+                data.messages.forEach(message => {
+                    const messageDiv = document.createElement('div');
+                    messageDiv.className = `message ${message.sender_id == {{ Auth::id() }} ? 'sent' : 'received'}`;
+                    messageDiv.innerHTML = `
+                        <div class="message-content">
+                            <strong>${message.sender.name}:</strong> ${message.message}
+                        </div>
+                        <div class="message-time">${new Date(message.created_at).toLocaleString()}</div>
+                    `;
+                    messagesContainer.appendChild(messageDiv);
+                });
+            } else {
+                messagesContainer.innerHTML = '<p style="text-align: center; color: #7f8c8d;">No messages yet. Start the conversation!</p>';
+            }
+
+            // Scroll to bottom
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        })
+        .catch(error => {
+            console.error('Error loading messages:', error);
+        });
+    }
+
+    // Send message
+    document.getElementById('send-message').addEventListener('click', function() {
+        const messageInput = document.getElementById('chat-message');
+        const message = messageInput.value.trim();
+
+        if (!message || !currentComplaintId) return;
+
+        // Disable send button
+        this.disabled = true;
+        this.textContent = 'Sending...';
+
+        fetch('/messages/send', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({
+                complaint_id: currentComplaintId,
+                message: message
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                messageInput.value = '';
+                loadMessages(currentComplaintId);
+            } else {
+                alert('Error sending message. Please try again.');
+            }
+        })
+        .catch(error => {
+            console.error('Error sending message:', error);
+            alert('Error sending message. Please try again.');
+        })
+        .finally(() => {
+            // Re-enable send button
+            this.disabled = false;
+            this.textContent = 'Send';
+        });
+    });
+
+    // Send message on Enter key
+    document.getElementById('chat-message').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            document.getElementById('send-message').click();
+        }
     });
 
     // Add notes functionality (placeholder)
@@ -497,4 +633,34 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
+
+<style>
+.message {
+    margin-bottom: 10px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    max-width: 70%;
+}
+
+.message.sent {
+    margin-left: auto;
+    background-color: #007bff;
+    color: white;
+}
+
+.message.received {
+    margin-right: auto;
+    background-color: #f8f9fa;
+    color: #333;
+}
+
+.message-content {
+    margin-bottom: 4px;
+}
+
+.message-time {
+    font-size: 0.8em;
+    opacity: 0.7;
+}
+</style>
 @endsection
