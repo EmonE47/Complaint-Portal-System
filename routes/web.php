@@ -2,6 +2,7 @@
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ComplaintController;
 use App\Http\Controllers\InspectorController;
+use App\Http\Controllers\MessageController;
 use App\Http\Controllers\InspectorRegistrationController;
 use Illuminate\Support\Facades\Route;
 
@@ -35,6 +36,15 @@ Route::post('logout', [UserController::class, 'logout'])->name('logout');
 Route::get('complaints', [ComplaintController::class, 'index'])->name('complaints');
 Route::post('complaints/store', [ComplaintController::class, 'store'])->name('complaints.store');
 Route::get('complaints/{id}', [ComplaintController::class, 'show'])->name('complaints.show');
+
+// Message routes
+Route::middleware('auth')->group(function () {
+    Route::get('messages/{complaintId}', [MessageController::class, 'getMessages'])->name('messages.get');
+    Route::post('messages/send', [MessageController::class, 'sendMessage'])->name('messages.send');
+    Route::post('messages/{complaintId}/mark-read', [MessageController::class, 'markAsRead'])->name('messages.markRead');
+    Route::get('messages/unread-count', [MessageController::class, 'getUnreadCount'])->name('messages.unreadCount');
+    Route::get('messages/conversations', [MessageController::class, 'getConversations'])->name('messages.conversations');
+});
 
 Route::prefix('inspector')->middleware(['auth', 'role:3'])->group(function () {
     Route::get('/dashboard', [InspectorController::class, 'dashboard'])->name('inspector.dashboard');
