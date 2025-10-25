@@ -293,28 +293,28 @@ class InspectorController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . Auth::id(),
-            'phone' => 'nullable|string|max:20',
-            'address' => 'nullable|string|max:500',
+            'phone_no' => 'nullable|string|max:20',
+            'badge_number' => 'nullable|string|max:255',
+            'department' => 'nullable|string|max:255',
         ]);
 
         $user = Auth::user();
         $user->name = $request->name;
         $user->email = $request->email;
-        $user->phone = $request->phone;
-        $user->address = $request->address;
+        $user->phone_no = $request->phone_no;
+        $user->badge_number = $request->badge_number;
+        $user->department = $request->department;
         $user->save();
 
         // Update inspectors table if needed
         DB::table('inspectors')->where('email', $user->email)->update([
             'name' => $request->name,
-            'phone' => $request->phone,
-            'address' => $request->address,
+            'number' => $request->phone_no,
+            'badge_number' => $request->badge_number,
+            'department' => $request->department,
         ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Profile updated successfully.',
-        ]);
+        return redirect()->back()->with('success', 'Profile updated successfully.');
     }
 
     public function changePassword(Request $request)
