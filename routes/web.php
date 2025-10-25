@@ -7,7 +7,7 @@ use App\Http\Controllers\InspectorRegistrationController;
 use Illuminate\Support\Facades\Route;
 
 // Route::get('/', [InspectorController::class, 'siDashboard'])->middleware(['auth', 'role:2'])->name('home');
-Route ::view('/', 'welcome')->name('home');
+Route::get('/', [UserController::class, 'home'])->name('home');
 // Registration routes
 Route::view('register', 'register')->name('register'); // GET - Show registration form
 Route::post('registerSave', [UserController::class, 'register'])->name('registerSave'); // POST - Process registration

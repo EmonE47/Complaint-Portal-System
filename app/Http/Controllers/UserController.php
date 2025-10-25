@@ -97,7 +97,25 @@ class UserController extends Controller
 
     public function logout(){
         Auth::logout();
-        return view('login');
+        return redirect()->route('login');
+    }
+
+    public function home(){
+        if(Auth::check()){
+            $user = Auth::user();
+
+            // Redirect based on role
+            if ($user->role == 2) { // SI
+                return redirect()->route('si.dashboard');
+            } elseif ($user->role == 3) { // Inspector
+                return redirect()->route('inspector.dashboard');
+            } else { // Regular user (role=1)
+                return redirect()->route('dashboard');
+            }
+        }
+        else{
+            return view('login');
+        }
     }
 
     public function updateProfile(Request $request){
