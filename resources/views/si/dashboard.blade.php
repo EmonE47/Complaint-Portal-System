@@ -895,21 +895,6 @@ document.addEventListener('DOMContentLoaded', function() {
    
 
 <style>
-/* Make action buttons a consistent size */
-.btn.action-btn {
-    min-width: 100px;
-    position: relative;
-}
 
-/* Dropdown arrow styling */
-.dropdown-arrow {
-    margin-left: 5px;
-    transition: transform 0.2s ease;
-    font-size: 0.8em;
-}
-
-/* Improve table overflow handling for dropdowns inside cells */
-.cases-table td, .cases-table th {
-    vertical-align: middle;
 </style>
 @endsection

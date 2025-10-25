@@ -1,90 +1,90 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inspector Registration</title>
-    <link href="{{ asset('css/inspector_register.css') }}" rel="stylesheet" />
-</head>
-<body>
-    <div class="form-container">
+@extends('layouts.auth')
+
+@section('title', 'Inspector Registration')
+
+@section('content')
+    <div class="auth-header">
         <h2>Inspector Registration</h2>
-
-        @if(session('success'))
-            <div class="success">{{ session('success') }}</div>
-        @endif
-
-        @if($errors->any())
-            <div class="error">
-                <ul>
-                    @foreach($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
-
-        <form action="{{ route('inspector.register') }}" method="POST">
-            @csrf
-
-            <div class="form-group">
-                <label for="name">Full Name:</label>
-                <input type="text" id="name" name="name" value="{{ old('name') }}" required>
-            </div>
-
-            <div class="form-group">
-                <label for="email">Email:</label>
-                <input type="email" id="email" name="email" value="{{ old('email') }}" required>
-            </div>
-
-            <div class="form-group">
-                <label for="number">Phone Number:</label>
-                <input type="text" id="number" name="number" value="{{ old('number') }}" required>
-            </div>
-
-            <div class="form-group">
-                <label for="nid_number">NID Number:</label>
-                <input type="text" id="nid_number" name="nid_number" value="{{ old('nid_number') }}" required>
-            </div>
-
-            <div class="form-group">
-                <label for="rank">Rank:</label>
-                <select id="rank" name="rank" required>
-                    <option value="">Select Rank</option>
-                    <option value="inspector" {{ old('rank') == 'inspector' ? 'selected' : '' }}>Inspector</option>
-                    <option value="si" {{ old('rank') == 'si' ? 'selected' : '' }}>Sub-Inspector (SI)</option>
-                    <option value="asi" {{ old('rank') == 'asi' ? 'selected' : '' }}>Assistant Sub-Inspector (ASI)</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="police_station_id">Police Station:</label>
-                <select id="police_station_id" name="police_station_id" required>
-                    <option value="">Select Police Station</option>
-                    @foreach($policeStations as $station)
-                        <option value="{{ $station->id }}" {{ old('police_station_id') == $station->id ? 'selected' : '' }}>
-                            {{ $station->name }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="password">Password:</label>
-                <input type="password" id="password" name="password" required minlength="6">
-            </div>
-
-            <div class="form-group">
-                <label for="password_confirmation">Confirm Password:</label>
-                <input type="password" id="password_confirmation" name="password_confirmation" required>
-            </div>
-
-            <button type="submit">Register</button>
-        </form>
-
-        <button type="button" class="login-btn" onclick="window.location.href='{{ route('login') }}'">
-            Back to Login
-        </button>
+        <p class="text-muted">Register as a law enforcement officer</p>
     </div>
-</body>
-</html>
+
+    @if(session('success'))
+        <div class="alert alert-success">
+            {{ session('success') }}
+        </div>
+    @endif
+
+    @if($errors->any())
+        <div class="alert alert-danger">
+            <ul class="mb-0">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+    <form action="{{ route('inspector.register') }}" method="POST">
+        @csrf
+
+        <div class="form-floating mb-3">
+            <input type="text" class="form-control" id="name" name="name" value="{{ old('name') }}" placeholder="Full Name" required>
+            <label for="name"><i class="fas fa-user me-2"></i>Full Name</label>
+        </div>
+
+        <div class="form-floating mb-3">
+            <input type="email" class="form-control" id="email" name="email" value="{{ old('email') }}" placeholder="name@example.com" required>
+            <label for="email"><i class="fas fa-envelope me-2"></i>Email</label>
+        </div>
+
+        <div class="form-floating mb-3">
+            <input type="tel" class="form-control" id="number" name="number" value="{{ old('number') }}" placeholder="Phone Number" required>
+            <label for="number"><i class="fas fa-phone me-2"></i>Phone Number</label>
+        </div>
+
+        <div class="form-floating mb-3">
+            <input type="text" class="form-control" id="nid_number" name="nid_number" value="{{ old('nid_number') }}" placeholder="NID Number" required>
+            <label for="nid_number"><i class="fas fa-id-card me-2"></i>NID Number</label>
+        </div>
+
+        <div class="form-floating mb-3">
+            <select class="form-select" id="rank" name="rank" required>
+                <option value="">Select Rank</option>
+                <option value="inspector" {{ old('rank') == 'inspector' ? 'selected' : '' }}>Inspector</option>
+                <option value="si" {{ old('rank') == 'si' ? 'selected' : '' }}>Sub-Inspector (SI)</option>
+                <option value="asi" {{ old('rank') == 'asi' ? 'selected' : '' }}>Assistant Sub-Inspector (ASI)</option>
+            </select>
+            <label for="rank"><i class="fas fa-star me-2"></i>Rank</label>
+        </div>
+
+        <div class="form-floating mb-3">
+            <select class="form-select" id="police_station_id" name="police_station_id" required>
+                <option value="">Select Police Station</option>
+                @foreach($policeStations as $station)
+                    <option value="{{ $station->id }}" {{ old('police_station_id') == $station->id ? 'selected' : '' }}>
+                        {{ $station->name }}
+                    </option>
+                @endforeach
+            </select>
+            <label for="police_station_id"><i class="fas fa-building me-2"></i>Police Station</label>
+        </div>
+
+        <div class="form-floating mb-3">
+            <input type="password" class="form-control" id="password" name="password" placeholder="Password" required minlength="6">
+            <label for="password"><i class="fas fa-lock me-2"></i>Password</label>
+        </div>
+
+        <div class="form-floating mb-4">
+            <input type="password" class="form-control" id="password_confirmation" name="password_confirmation" placeholder="Confirm Password" required>
+            <label for="password_confirmation"><i class="fas fa-lock me-2"></i>Confirm Password</label>
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+            <i class="fas fa-user-shield me-2"></i>Register as Inspector
+        </button>
+    </form>
+
+    <button type="button" class="btn btn-secondary" onclick="window.location.href='{{ route('login') }}'">
+        <i class="fas fa-arrow-left me-2"></i>Back to Login
+    </button>
+@endsection
