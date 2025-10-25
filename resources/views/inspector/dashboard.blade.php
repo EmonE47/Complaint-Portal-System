@@ -13,6 +13,12 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 <body>
+    <!-- Hamburger Menu -->
+<button class="menu-toggle" id="menuToggle">
+    <span></span>
+    <span></span>
+    <span></span>
+</button>
     <div class="sidebar">
         <div class="sidebar-header">
             <h2>NAME OF STATION</h2>
@@ -1121,6 +1127,61 @@
                 }, 5000);
             }
         });
+        // Mobile menu functionality
+const menuToggle = document.getElementById('menuToggle');
+const sidebar = document.querySelector('.sidebar');
+const mainContent = document.querySelector('.main-content');
+
+if (menuToggle) {
+    menuToggle.addEventListener('click', function() {
+        this.classList.toggle('active');
+        sidebar.classList.toggle('active');
+        mainContent.classList.toggle('sidebar-open');
+        
+        // Prevent body scroll when menu is open on mobile
+        if (sidebar.classList.contains('active')) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+    });
+}
+
+// Close menu when clicking on a link (mobile)
+document.querySelectorAll('.sidebar-menu a').forEach(link => {
+    link.addEventListener('click', function() {
+        if (window.innerWidth <= 767.98) {
+            menuToggle.classList.remove('active');
+            sidebar.classList.remove('active');
+            mainContent.classList.remove('sidebar-open');
+            document.body.style.overflow = '';
+        }
+    });
+});
+
+// Close menu when clicking outside (mobile)
+document.addEventListener('click', function(event) {
+    if (window.innerWidth <= 767.98 && 
+        sidebar.classList.contains('active') &&
+        !sidebar.contains(event.target) &&
+        !menuToggle.contains(event.target)) {
+        menuToggle.classList.remove('active');
+        sidebar.classList.remove('active');
+        mainContent.classList.remove('sidebar-open');
+        document.body.style.overflow = '';
+    }
+});
+
+// Handle window resize
+window.addEventListener('resize', function() {
+    if (window.innerWidth > 767.98) {
+        // Reset mobile menu state on larger screens
+        menuToggle.classList.remove('active');
+        sidebar.classList.remove('active');
+        mainContent.classList.remove('sidebar-open');
+        document.body.style.overflow = '';
+    }
+});
     </script>
 </body>
 </html>
