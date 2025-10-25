@@ -169,16 +169,16 @@
                             <td>{{ $complaint->complainant_name }}</td>
                             <td>{{ $complaint->currentAssignment ? $complaint->currentAssignment->assigned_at->format('M d, Y') : 'N/A' }}</td>
                             <td>
-                                <div class="dropdown">
-                                    <button class="btn action-btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                        Actions
-                                    </button>
-                                    <ul class="dropdown-menu">
-                                        <li><a class="dropdown-item view-details-btn" href="#" data-complaint-id="{{ $complaint->id }}"><i class="fas fa-eye me-2"></i>View Details</a></li>
-                                        <li><a class="dropdown-item update-status-btn" href="#" data-complaint-id="{{ $complaint->id }}"><i class="fas fa-edit me-2"></i>Update Status</a></li>
-                                        <li><a class="dropdown-item chat-btn" href="#" data-complaint-id="{{ $complaint->id }}"><i class="fas fa-comments me-2"></i>Chat with User</a></li>
-                                        <li><a class="dropdown-item add-notes-btn" href="#" data-complaint-id="{{ $complaint->id }}"><i class="fas fa-file-alt me-2"></i>Add Notes</a></li>
-                                    </ul>
+                                <button class="btn action-btn" onclick="toggleDropdown({{ $complaint->id }})" id="actionBtn{{ $complaint->id }}">
+                                    Actions <i class="fas fa-chevron-down dropdown-arrow" id="arrow{{ $complaint->id }}"></i>
+                                </button>
+                                <div id="dropdown{{ $complaint->id }}" class="custom-dropdown-menu" style="display: none; position: fixed; z-index: 10000; background: white; border: 1px solid #ccc; border-radius: 4px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); min-width: 180px;">
+                                    <div style="padding: 8px 0;">
+                                        <a class="dropdown-item view-details-btn" href="#" data-complaint-id="{{ $complaint->id }}" style="display: block; padding: 8px 16px; color: #333; text-decoration: none;"><i class="fas fa-eye me-2"></i>View Details</a>
+                                        <a class="dropdown-item update-status-btn" href="#" data-complaint-id="{{ $complaint->id }}" style="display: block; padding: 8px 16px; color: #333; text-decoration: none;"><i class="fas fa-edit me-2"></i>Update Status</a>
+                                        <a class="dropdown-item chat-btn" href="#" data-complaint-id="{{ $complaint->id }}" style="display: block; padding: 8px 16px; color: #333; text-decoration: none;"><i class="fas fa-comments me-2"></i>Chat with User</a>
+                                        <a class="dropdown-item add-notes-btn" href="#" data-complaint-id="{{ $complaint->id }}" style="display: block; padding: 8px 16px; color: #333; text-decoration: none;"><i class="fas fa-file-alt me-2"></i>Add Notes</a>
+                                    </div>
                                 </div>
                             </td>
                         </tr>
@@ -453,26 +453,7 @@
         </div>
     </div>
 
-    <!-- Chat Modal -->
-    <div class="modal fade" id="chatModal" tabindex="-1" aria-labelledby="chatModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="chatModalLabel">Chat with User</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div id="chat-messages" style="height: 400px; overflow-y: auto; border: 1px solid #ddd; padding: 10px; margin-bottom: 10px;">
-                        <!-- Messages will be loaded here -->
-                    </div>
-                    <div class="input-group">
-                        <input type="text" id="chat-message" class="form-control" placeholder="Type your message..." maxlength="1000">
-                        <button class="btn btn-primary" id="send-message">Send</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    @include('partials.chat')
 
     <!-- Loading Spinner -->
     <div class="loading-spinner" id="loadingSpinner">
@@ -538,6 +519,60 @@ document.addEventListener('DOMContentLoaded', function() {
         // ignore localStorage errors
     }
 
+    // Custom dropdown functionality using event delegation
+    document.addEventListener('click', function(e) {
+        // Handle dropdown button clicks
+        if (e.target.classList.contains('action-btn')) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const complaintId = e.target.id.replace('actionBtn', '');
+            toggleDropdown(complaintId);
+        }
+        // Close dropdowns when clicking outside
+        else if (!e.target.closest('.custom-dropdown-menu') && !e.target.classList.contains('action-btn')) {
+            closeAllDropdowns();
+        }
+    });
+
+    function toggleDropdown(complaintId) {
+        // Close all other dropdowns
+        closeAllDropdowns();
+
+        const button = document.getElementById('actionBtn' + complaintId);
+        const dropdown = document.getElementById('dropdown' + complaintId);
+        const arrow = document.getElementById('arrow' + complaintId);
+
+        if (!button || !dropdown) {
+            console.error('Button or dropdown not found for complaint ID:', complaintId);
+            return;
+        }
+
+        if (dropdown.style.display === 'none' || dropdown.style.display === '') {
+            // Position the dropdown
+            const rect = button.getBoundingClientRect();
+            dropdown.style.display = 'block';
+            dropdown.style.left = rect.left + 'px';
+            dropdown.style.top = (rect.bottom + window.scrollY) + 'px';
+            // Rotate arrow up
+            if (arrow) arrow.style.transform = 'rotate(180deg)';
+        } else {
+            dropdown.style.display = 'none';
+            // Rotate arrow down
+            if (arrow) arrow.style.transform = 'rotate(0deg)';
+        }
+    }
+
+    function closeAllDropdowns() {
+        document.querySelectorAll('.custom-dropdown-menu').forEach(menu => {
+            menu.style.display = 'none';
+        });
+        // Reset all arrows to down position
+        document.querySelectorAll('.dropdown-arrow').forEach(arrow => {
+            arrow.style.transform = 'rotate(0deg)';
+        });
+    }
+
     // Status update modal functionality
     const statusUpdateModal = new bootstrap.Modal(document.getElementById('statusUpdateModal'));
 
@@ -547,6 +582,7 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('caseId').value = complaintId;
             document.getElementById('caseNumber').textContent = `#CMP${complaintId.padStart(7, '0')}`;
             statusUpdateModal.show();
+            closeAllDropdowns(); // Close dropdown when modal opens
         });
     });
 
@@ -557,6 +593,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const complaintId = this.getAttribute('data-complaint-id');
             // TODO: Implement view details functionality
             alert(`View details for complaint ID: ${complaintId}`);
+            closeAllDropdowns(); // Close dropdown when alert shows
         });
     });
 
@@ -569,6 +606,7 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
             currentComplaintId = e.target.getAttribute('data-complaint-id');
             openChatModal(currentComplaintId);
+            closeAllDropdowns(); // Close dropdown when chat modal opens
         }
     });
 
@@ -705,6 +743,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const complaintId = this.getAttribute('data-complaint-id');
             // TODO: Implement add notes functionality
             alert(`Add notes for complaint ID: ${complaintId}`);
+            closeAllDropdowns(); // Close dropdown when alert shows
         });
     });
 
@@ -853,7 +892,24 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<style>
+   
 
+<style>
+/* Make action buttons a consistent size */
+.btn.action-btn {
+    min-width: 100px;
+    position: relative;
+}
+
+/* Dropdown arrow styling */
+.dropdown-arrow {
+    margin-left: 5px;
+    transition: transform 0.2s ease;
+    font-size: 0.8em;
+}
+
+/* Improve table overflow handling for dropdowns inside cells */
+.cases-table td, .cases-table th {
+    vertical-align: middle;
 </style>
 @endsection
