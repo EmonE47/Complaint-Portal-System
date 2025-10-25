@@ -87,8 +87,8 @@
     <!-- Cases Section (in-page) -->
     <div id="cases" class="section">
         <div class="row" style="margin: 0 40px 40px;">
-            <div class="col-lg-8">
-                <div class="content-section">
+            <div class="col-lg-12">
+                <div class="content-section" id="Casss">
                     <div class="section-header">
                         <h2 class="section-title">My Assigned Cases</h2>
                         <div class="search-box">
@@ -193,9 +193,9 @@
                 </div>
             </div>
 
-            <div class="col-lg-4">
+            <div class="col-lg-12">
                 <!-- Case Statistics Card -->
-                <div class="sidebar-card">
+                <div class="sidebar-card" id="case_s">
                     <div class="sidebar-card-header">
                         <h3 class="sidebar-card-title">Case Statistics</h3>
                     </div>
@@ -220,7 +220,7 @@
                 </div>
 
                 <!-- Recent Activity Card -->
-                <div class="sidebar-card">
+                <div class="sidebar-card" id="rec">
                     <div class="sidebar-card-header">
                         <h3 class="sidebar-card-title">Recent Activity</h3>
                     </div>
@@ -307,7 +307,7 @@
     </div>
     <div id="messages" class="section">
         <div class="row" style="margin: 20px 40px; gap:20px;">
-            <div class="col-lg-4">
+            <div class="col-lg-12">
                 <div class="sidebar-card">
                     <div class="sidebar-card-header">
                         <h3 class="sidebar-card-title">Conversations</h3>
@@ -329,7 +329,7 @@
                 </div>
             </div>
 
-            <div class="col-lg-8">
+            {{-- <div class="col-lg-8">
                 <div class="content-section" id="Content_of_My_cases">
                     <div class="section-header">
                         <h2 class="section-title">Messages</h2>
@@ -338,7 +338,7 @@
                         <div id="messages-empty" style="text-align:center;color:#7f8c8d;padding:50px">Select a conversation on the left to start chatting.</div>
                     </div>
                 </div>
-            </div>
+            </div> --}}
         </div>
     </div>
 
@@ -379,6 +379,32 @@
                     <div class="card-value">{{ $assignedComplaints->where('status','resolved')->count() }}</div>
                 </div>
             </div>
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
             <div style="margin-top:20px;">
                 <table class="cases-table">
