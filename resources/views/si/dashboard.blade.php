@@ -3,7 +3,12 @@
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700&family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
 <link href="{{ asset('css/si-dashboard.css') }}" rel="stylesheet" />
-
+<!-- Hamburger Menu -->
+<button class="menu-toggle" id="menuToggle">
+    <span></span>
+    <span></span>
+    <span></span>
+</button>
 <div class="sidebar">
     <div class="sidebar-header">
         <h2>Police GD System</h2>
@@ -890,27 +895,123 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 5000);
     }
 });
+// Mobile menu functionality
+const menuToggle = document.getElementById('menuToggle');
+const sidebar = document.querySelector('.sidebar');
+const mainContent = document.querySelector('.main-content');
+
+if (menuToggle) {
+    menuToggle.addEventListener('click', function() {
+        this.classList.toggle('active');
+        sidebar.classList.toggle('active');
+        mainContent.classList.toggle('sidebar-open');
+        
+        // Prevent body scroll when menu is open on mobile
+        if (sidebar.classList.contains('active')) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+    });
+}
+
+// Close menu when clicking on a link (mobile)
+document.querySelectorAll('.sidebar-menu a').forEach(link => {
+    link.addEventListener('click', function() {
+        if (window.innerWidth <= 767.98) {
+            menuToggle.classList.remove('active');
+            sidebar.classList.remove('active');
+            mainContent.classList.remove('sidebar-open');
+            document.body.style.overflow = '';
+        }
+    });
+});
+
+// Close menu when clicking outside (mobile)
+document.addEventListener('click', function(event) {
+    if (window.innerWidth <= 767.98 && 
+        sidebar.classList.contains('active') &&
+        !sidebar.contains(event.target) &&
+        !menuToggle.contains(event.target)) {
+        menuToggle.classList.remove('active');
+        sidebar.classList.remove('active');
+        mainContent.classList.remove('sidebar-open');
+        document.body.style.overflow = '';
+    }
+});
+
+// Handle window resize
+window.addEventListener('resize', function() {
+    if (window.innerWidth > 767.98) {
+        // Reset mobile menu state on larger screens
+        menuToggle.classList.remove('active');
+        sidebar.classList.remove('active');
+        mainContent.classList.remove('sidebar-open');
+        document.body.style.overflow = '';
+    }
+});
+
+// Handle dropdown positioning on mobile
+function positionDropdown(complaintId) {
+    const button = document.getElementById('actionBtn' + complaintId);
+    const dropdown = document.getElementById('dropdown' + complaintId);
+    
+    if (!button || !dropdown) return;
+    
+    const rect = button.getBoundingClientRect();
+    
+    if (window.innerWidth <= 767.98) {
+        // On mobile, position dropdown to avoid going off-screen
+        const viewportWidth = window.innerWidth;
+        const dropdownWidth = 180;
+        
+        let left = rect.left;
+        if (left + dropdownWidth > viewportWidth - 10) {
+            left = viewportWidth - dropdownWidth - 10;
+        }
+        if (left < 10) {
+            left = 10;
+        }
+        
+        dropdown.style.left = left + 'px';
+    } else {
+        dropdown.style.left = rect.left + 'px';
+    }
+    
+    dropdown.style.top = (rect.bottom + window.scrollY) + 'px';
+}
+
+// Update your existing toggleDropdown function to use positionDropdown
+function toggleDropdown(complaintId) {
+    // Close all other dropdowns
+    closeAllDropdowns();
+
+    const button = document.getElementById('actionBtn' + complaintId);
+    const dropdown = document.getElementById('dropdown' + complaintId);
+    const arrow = document.getElementById('arrow' + complaintId);
+
+    if (!button || !dropdown) {
+        console.error('Button or dropdown not found for complaint ID:', complaintId);
+        return;
+    }
+
+    if (dropdown.style.display === 'none' || dropdown.style.display === '') {
+        // Position the dropdown
+        positionDropdown(complaintId);
+        dropdown.style.display = 'block';
+        // Rotate arrow up
+        if (arrow) arrow.style.transform = 'rotate(180deg)';
+    } else {
+        dropdown.style.display = 'none';
+        // Rotate arrow down
+        if (arrow) arrow.style.transform = 'rotate(0deg)';
+    }
+}
 </script>
 
    
 
 <style>
-/* Make action buttons a consistent size */
-.btn.action-btn {
-    min-width: 100px;
-    position: relative;
-}
 
-/* Dropdown arrow styling */
-.dropdown-arrow {
-    margin-left: 5px;
-    transition: transform 0.2s ease;
-    font-size: 0.8em;
-}
-
-/* Improve table overflow handling for dropdowns inside cells */
-.cases-table td, .cases-table th {
-    vertical-align: middle;
-}
 </style>
 @endsection
