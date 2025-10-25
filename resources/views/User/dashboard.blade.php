@@ -1,7 +1,14 @@
 @extends('layouts.app')
 
 @section('content')
+<button class="menu-toggle" id="menuToggle">
+    <span></span>
+    <span></span>
+    <span></span>
+</button>
 <link href="{{ asset('css/User_dash.css') }}" rel="stylesheet" />
+<!-- Hamburger Menu -->
+
 <div class="sidebar">
     <div class="sidebar-header">
         <h2>Complaint Dashboard</h2>
@@ -696,10 +703,206 @@
 
     // Initialize the form state
     document.getElementById('is_same_address').dispatchEvent(new Event('change'));
+    // Mobile menu functionality
+const menuToggle = document.getElementById('menuToggle');
+const sidebar = document.querySelector('.sidebar');
+const mainContent = document.querySelector('.main-content');
+
+if (menuToggle) {
+    menuToggle.addEventListener('click', function() {
+        this.classList.toggle('active');
+        sidebar.classList.toggle('active');
+        mainContent.classList.toggle('sidebar-open');
+        
+        // Prevent body scroll when menu is open on mobile
+        if (sidebar.classList.contains('active')) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+    });
+}
+
+// Close menu when clicking on a link (mobile)
+document.querySelectorAll('.sidebar-menu a').forEach(link => {
+    link.addEventListener('click', function() {
+        if (window.innerWidth <= 991.98) {
+            menuToggle.classList.remove('active');
+            sidebar.classList.remove('active');
+            mainContent.classList.remove('sidebar-open');
+            document.body.style.overflow = '';
+        }
+    });
+});
+
+// Close menu when clicking outside (mobile)
+document.addEventListener('click', function(event) {
+    if (window.innerWidth <= 991.98 && 
+        sidebar.classList.contains('active') &&
+        !sidebar.contains(event.target) &&
+        !menuToggle.contains(event.target)) {
+        menuToggle.classList.remove('active');
+        sidebar.classList.remove('active');
+        mainContent.classList.remove('sidebar-open');
+        document.body.style.overflow = '';
+    }
+});
+
+// Handle window resize
+window.addEventListener('resize', function() {
+    if (window.innerWidth > 991.98) {
+        // Reset mobile menu state on larger screens
+        menuToggle.classList.remove('active');
+        sidebar.classList.remove('active');
+        mainContent.classList.remove('sidebar-open');
+        document.body.style.overflow = '';
+    }
+});
+
+// Handle form submission success
+function showSuccessMessage(complaintNumber) {
+    const successMessage = document.getElementById('success-message');
+    const complaintIdElement = document.getElementById('complaint-id');
+    
+    if (successMessage && complaintIdElement) {
+        complaintIdElement.textContent = complaintNumber;
+        successMessage.style.display = 'block';
+        
+        // Scroll to top to show the message
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        
+        // Hide success message after 5 seconds
+        setTimeout(() => {
+            successMessage.style.display = 'none';
+        }, 5000);
+    }
+}
+
+// Enhanced file preview functionality
+document.getElementById('attachments').addEventListener('change', function(e) {
+    const filePreview = document.getElementById('file-preview');
+    filePreview.innerHTML = '';
+
+    Array.from(this.files).forEach(file => {
+        const fileItem = document.createElement('div');
+        fileItem.className = 'file-preview-item';
+
+        const fileIcon = document.createElement('i');
+        if (file.type.startsWith('image/')) {
+            fileIcon.className = 'fas fa-image';
+        } else if (file.type === 'application/pdf') {
+            fileIcon.className = 'fas fa-file-pdf';
+        } else if (file.type.includes('word') || file.type.includes('document')) {
+            fileIcon.className = 'fas fa-file-word';
+        } else {
+            fileIcon.className = 'fas fa-file';
+        }
+
+        const fileName = document.createElement('span');
+        fileName.textContent = file.name;
+        
+        const fileSize = document.createElement('span');
+        fileSize.textContent = ` (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
+        fileSize.style.color = '#6c757d';
+        fileSize.style.fontSize = '12px';
+        fileSize.style.marginLeft = '5px';
+
+        fileItem.appendChild(fileIcon);
+        fileItem.appendChild(fileName);
+        fileItem.appendChild(fileSize);
+        filePreview.appendChild(fileItem);
+    });
+});
+
+// Enhanced same address functionality
+document.getElementById('is_same_address').addEventListener('change', function() {
+    const presentAddressSection = document.getElementById('present-address-section');
+    const presentAddressField = document.getElementById('present_address');
+    const permanentAddressField = document.getElementById('permanent_address');
+
+    if (this.checked) {
+        presentAddressSection.style.display = 'none';
+        presentAddressField.removeAttribute('required');
+        presentAddressField.value = '';
+        presentAddressField.setAttribute('disabled', 'disabled');
+        
+        // Copy permanent address to present address
+        if (permanentAddressField && permanentAddressField.value) {
+            presentAddressField.value = permanentAddressField.value;
+        }
+    } else {
+        presentAddressSection.style.display = 'block';
+        presentAddressField.setAttribute('required', 'required');
+        presentAddressField.removeAttribute('disabled');
+    }
+});
+
+// Auto-copy permanent address when typing if checkbox is checked
+document.getElementById('permanent_address').addEventListener('input', function() {
+    const isSameAddress = document.getElementById('is_same_address');
+    const presentAddressField = document.getElementById('present_address');
+    
+    if (isSameAddress.checked && presentAddressField) {
+        presentAddressField.value = this.value;
+    }
+});
+
+// Enhanced form validation
+document.getElementById('complaint-form').addEventListener('submit', function(e) {
+    const requiredFields = this.querySelectorAll('[required]');
+    let isValid = true;
+    
+    requiredFields.forEach(field => {
+        if (!field.value.trim()) {
+            isValid = false;
+            field.style.borderColor = '#e74c3c';
+        } else {
+            field.style.borderColor = '#1c687b';
+        }
+    });
+    
+    if (!isValid) {
+        e.preventDefault();
+        alert('Please fill in all required fields marked with *');
+    }
+});
+
+// Reset form field borders on input
+document.querySelectorAll('.form-control').forEach(field => {
+    field.addEventListener('input', function() {
+        this.style.borderColor = '#1c687b';
+    });
+});
+
+// Initialize the form state on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize same address checkbox
+    document.getElementById('is_same_address').dispatchEvent(new Event('change'));
+    
+    // Add loading states to buttons
+    document.querySelectorAll('form').forEach(form => {
+        form.addEventListener('submit', function() {
+            const submitButton = this.querySelector('button[type="submit"]');
+            if (submitButton) {
+                submitButton.disabled = true;
+                const originalText = submitButton.textContent;
+                submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+                
+                // Re-enable button after 10 seconds if still disabled (fallback)
+                setTimeout(() => {
+                    if (submitButton.disabled) {
+                        submitButton.disabled = false;
+                        submitButton.textContent = originalText;
+                    }
+                }, 10000);
+            }
+        });
+    });
+});
 </script>
 
 <style>
-.message {
+/* .message {
     margin-bottom: 10px;
     padding: 8px 12px;
     border-radius: 8px;
@@ -725,6 +928,6 @@
 .message-time {
     font-size: 0.8em;
     opacity: 0.7;
-}
+} */
 </style>
 @endsection
