@@ -13,6 +13,19 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 <body>
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert" style="position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px;">
+            <i class="fas fa-check-circle me-2"></i>{{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show" role="alert" style="position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px;">
+            <i class="fas fa-exclamation-triangle me-2"></i>{{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
     <!-- Hamburger Menu -->
 <button class="menu-toggle" id="menuToggle">
     <span></span>
@@ -179,7 +192,7 @@
                     </div>
                 </div>
                 
-                <div class="col-lg-6" gridcar>
+                <div class="col-lg-12" gridcar>
                     <div class="sidebar-card">
                         <div class="sidebar-card-header">
                             <h3 class="sidebar-card-title">Sub-Inspectors</h3>
@@ -587,7 +600,7 @@
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label class="form-label">Phone Number</label>
-                                                <input type="text" class="form-control" name="phone" value="{{ Auth::user()->phone ?? '' }}">
+                                                <input type="text" class="form-control" name="phone_no" value="{{ Auth::user()->phone_no ?? '' }}">
                                             </div>
                                         </div>
                                         <div class="col-md-6">
@@ -868,6 +881,17 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Auto-hide alerts after 5 seconds
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                const alerts = document.querySelectorAll('.alert');
+                alerts.forEach(function(alert) {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                });
+            }, 5000);
+        });
+
         document.addEventListener('DOMContentLoaded', function() {
             // Navigation between sections
             document.querySelectorAll('.sidebar-menu a').forEach(link => {
