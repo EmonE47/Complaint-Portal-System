@@ -18,6 +18,8 @@ class Inspector extends Authenticatable
         'rank',
         'police_station_id',
         'password',
+        'badge_number',
+        'department',
     ];
 
     protected $hidden = [
