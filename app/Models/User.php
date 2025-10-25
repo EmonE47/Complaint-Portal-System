@@ -28,6 +28,8 @@ class User extends Authenticatable
         'police_station_id',
         'rank',
         'nid_number',
+        'badge_number',
+        'department',
     ];
 
     /**
